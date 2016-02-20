@@ -10,18 +10,18 @@ module.exports.calculateDistance = function(pointOne, pointTwo) {
    		"&key="+API_KEY;
 	return new Promise(function(resolve, reject) {
 		request
-   		.get(string)
-   		.end(function(err, res) {
-   			if(err || !res.ok) {
-   				reject("error");
-   			} else {
-   				if(res.body.rows === undefined) {
-   					reject("error");
-   				} else{
-   					resolve(res.body.rows[0].elements[0].distance.value);
-   				}
-   			}
-   		})
+	   		.get(string)
+	   		.end(function(err, res) {
+	   			if(err || !res.ok) {
+	   				reject("error");
+	   			} else {
+	   				if(res.body.rows === undefined) {
+	   					reject("error");
+	   				} else{
+	   					resolve(res.body.rows[0].elements[0].distance.value);
+	   				}
+	   			}
+	   		})
 	})
 }
 

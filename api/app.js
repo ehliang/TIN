@@ -3,11 +3,13 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
+var striptags = require('striptags');
 
 var app = express();
 var mapRouter = require('./routes/mapRouter.js');
 var midpoint = require('./midpoint.js');
-var util = require('./util.js')
+var util = require('./util.js');
+var mapDirection = require('./mapDirection.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -30,7 +32,7 @@ var port = process.env.PORT || 8080;
 
 app.get('/', function (req, res) {
 	var temp1 = [43.47248,-80.53370];
-	var temp2 = [43.77348,-80.53548];
+	var temp2 = [43.57348,-80.53548];
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
@@ -67,8 +69,46 @@ app.get('/', function (req, res) {
 				}
 			}
 		})
-		res.send(min);
-	});
+		return new Promise(function(resolve, reject) {
+			res.send(min);
+			resolve(min);
+		});
+	}).then(function(data) {
+		var userOneDirections = [];
+		var userTwoDirections = [];
+		mapDirection.findDirections(temp1, [data.owner.geometry.location.lat, data.owner.geometry.location.lng])
+		.then(function(response) {
+			_.forEach(response, function(step) {
+				userOneDirections.push(striptags(step.html_instructions));
+			});
+			return new Promise(function(resolve, reject) {
+				resolve(true);
+			});
+		}).then(function(response) {
+			mapDirection.findDirections(temp2, [data.owner.geometry.location.lat, data.owner.geometry.location.lng])
+			.then(function(response) {
+				_.forEach(response, function(step) {
+					userTwoDirections.push(striptags(step.html_instructions));
+				});
+				return new Promise(function(resolve, reject) {
+					console.log(userOneDirections);
+					console.log(userTwoDirections);
+					var obj = {
+						"name": data.owner.name,
+						"address": data.owner.vicinity,
+						"userOne": userOneDirections,
+						"userTwo": userTwoDirections
+					}
+					console.log(obj);
+					var stringed = JSON.stringify(obj);
+					console.log(stringed);
+					res.send(stringed);
+
+					resolve(true);
+				});
+			})
+		})
+	})
 });
 
 // use our router middleware
