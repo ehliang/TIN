@@ -35,31 +35,28 @@ app.get('/', function (req, res) {
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
-	midpoint.findNearbyPlaces(midpointish).then(function(response) {
-		return new Promise(function(resolve, reject) {
-			Promise.all(response.forEach(function(place) {
-				var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
-				midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
-					console.log(++i);
-					if(min === undefined) {
-						min = {
-							'distance': response, 
-							'owner': place
-						}
-					} else {
-						if (response < min.distance) {
-							min.distance = response;
-							min.owner = place;
-						}
+	midpoint.findNearbyPlaces(midpointish)
+	.then(function(response) {
+		response.forEach(function(place) {
+			var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
+			midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
+				console.log(++i);
+				if(min === undefined) {
+					min = {
+						'distance': response, 
+						'owner': place
 					}
-					console.log(min);
-				});
-			})).then(function(response) {
-				resolve(min);
+				} else {
+					if (response < min.distance) {
+						min.distance = response;
+						min.owner = place;
+					}
+				}
 			});
-		})		
-	}).then(function(response) {
-		console.log("happy");
+		});
+		console.log(min);	
+	}).then(function(min) {
+		console.log("happy ", min);
 	});
 });
 
