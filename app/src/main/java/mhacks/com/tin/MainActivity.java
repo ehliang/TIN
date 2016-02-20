@@ -6,14 +6,17 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+    private double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +33,12 @@ public class MainActivity extends AppCompatActivity {
                 {
                     locationManager.removeUpdates(this);
                 }
-                double lat = location.getLatitude();
-                double longi = location.getLongitude();
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
                 TextView test = (TextView) findViewById(R.id.test_text);
-                test.setText("" + lat + longi);
+                test.setText("" + latitude + longitude);
 
-                Log.i(String.valueOf(lat), String.valueOf(longi));
+                Log.i("" + latitude, "" + longitude);
 
             }
 
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+
         Button sendLocation = (Button) findViewById(R.id.send_location);
         sendLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,7 +71,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        Button sendText = (Button) findViewById(R.id.send_text);
+        sendText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String messageContent = "@" + latitude + "@" + longitude;
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage("17082924124", null, messageContent, null, null);
+                Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 

@@ -11,6 +11,7 @@
         android:id="@+id/send_location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="getLocation"
         android:layout_centerHorizontal="true"/>
 
     <TextView
@@ -19,5 +20,10 @@
         android:layout_height="wrap_content"
         android:text="abcd"
         android:layout_below="@id/send_location"/>
+    <Button
+        android:id="@+id/send_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="send text"/>
 
 </RelativeLayout>
