@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +18,12 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private double latitude, longitude;
+    private static MainActivity inst;
+
+    public static MainActivity instance()
+    {
+        return inst;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        TelephonyManager tMgr = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
 
+        final String mPhoneNumber = tMgr.getLine1Number();
+
+        final Button sendLocation = (Button) findViewById(R.id.send_location);
 
         final LocationListener locationListener = new LocationListener() {
             @Override
@@ -32,11 +43,24 @@ public class MainActivity extends AppCompatActivity {
                 if (location!=null)
                 {
                     locationManager.removeUpdates(this);
+                    SmsManager smsManager = SmsManager.getDefault();
+
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+
+                    sendLocation.setText("Location Found\nWaiting for Match");
+
+                    Log.i(mPhoneNumber, "phone number");
+                    String messageContent = "@" + mPhoneNumber + "@" + latitude + "@" + longitude;
+
+                    Log.i("messageContent", messageContent);
+                    smsManager.sendTextMessage("17082924124", null, messageContent, null, null);
+                    Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
+
                 }
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+
                 TextView test = (TextView) findViewById(R.id.test_text);
-                test.setText("" + latitude + longitude);
+                test.setText("Your Location is:\n" + "Latitude: " + latitude + "\nand\n Longitude: " + longitude);
 
                 Log.i("" + latitude, "" + longitude);
 
@@ -61,27 +85,21 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-        Button sendLocation = (Button) findViewById(R.id.send_location);
         sendLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("pressed", "button");
+                sendLocation.setText("Retrieving Location...");
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
             }
         });
 
-        Button sendText = (Button) findViewById(R.id.send_text);
-        sendText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String messageContent = "@" + latitude + "@" + longitude;
-                SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage("17082924124", null, messageContent, null, null);
-                Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
-            }
-        });
 
+    }
+
+    public static void retreiveMessage(String messageString)
+    {
     }
 
     @Override

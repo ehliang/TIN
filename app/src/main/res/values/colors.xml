@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="main_color" type="color">#FFAA66CC</item>
+    <item name="main_color" type="color">#000080</item>
+    <item name="white" type="color">#FFFFFF</item>
 
 
 
