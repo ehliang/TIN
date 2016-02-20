@@ -4,6 +4,31 @@ var express = require('express');
 var twilio = require('twilio');
 var bodyParser = require('body-parser');
 
+var Firebase = require('firebase');
+var myFirebaseRef = new Firebase("https://tin-m-hacks.firebaseio.com");  
+var userCounter =0;
+
+// setInterval(function(){
+//           myFirebaseRef.child(userCounter).set({
+//             latitude:"latitude", 
+//             longitude:"ejwieiwfjiwef"
+//         });
+//             userCounter++;
+// }, 5 * 1000);    
+
+
+        // //create firebase entry based on uuid
+        // myFirebaseRef.child("uwegfwwfwe").set({
+        //     latitude:"latitude", 
+        //     longitude:"ejwieiwfjiwef", 
+        // });
+
+        // myFirebaseRef.on("value", function(snapshot) {
+        // console.log(snapshot.val());
+        // }, function (errorObject) {
+        //  console.log("The read failed: " + errorObject.code);
+        // });
+
 var app = express();
 //var mapRouter = require('../routes/mapRouter.js');
 
@@ -29,8 +54,34 @@ app.post('/', function(req, res){
 	var splitRequest = requestContent.split("@");
     console.dir(String(req.body.Body));
     if(splitRequest[0] === ""){
-    	var latitude = splitRequest[1];
-    	var longitude = splitRequest[2];
+        var uuid = splitRequest[1];
+    	var latitude = splitRequest[2];
+    	var longitude = splitRequest[3];
+
+        //create firebase entry based on uuid
+        myFirebaseRef.child(uuid).set({
+            latitude:latitude, 
+            longitude:longitude, 
+        });
+
+
+        //updates firebase snapshot every time new data is added
+        myFirebaseRef.on("value", function(snapshot) {
+        console.log(snapshot.val());
+
+        }, function (errorObject) {
+         console.log("The read failed: " + errorObject.code);
+        });
+
+        //sets a timer to delete "beacons" older than two minutes
+        var now = Date.now(); 
+        var cutoff = now - 5 * 60 * 1000; 
+        var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff).limitToLast(1); 
+        var listener = old.on('child_added', function(snapshot) {
+        snapshot.ref().remove();
+        });
+
+
 
     	console.log("latitude = " + latitude + "\nlongitude = " + longitude);
     }else{
