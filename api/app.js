@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var app = express();
 var mapRouter = require('./routes/mapRouter.js');
+var midpoint = require('./midpoint.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -26,7 +27,13 @@ app.use(function(req, res, next) {
 var port = process.env.PORT || 8080;
 
 app.get('/', function (req, res) {
-  res.send('Hello World!');
+	var temp1 = [43.47248,-80.53370];
+	var temp2 = [43.57429,-80.53548];
+	var temp3 = midpoint.findMidPoint(temp1, temp2);
+	midpoint.findGatheringPoint(temp1, temp2, temp3)
+	.then(function(response) {
+		res.send(response);
+	})
 });
 
 // use our router middleware
