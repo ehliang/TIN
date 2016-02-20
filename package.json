@@ -23,6 +23,7 @@
     "googlemaps": "^1.2.0",
     "lodash": "^4.5.0",
     "nodemon": "^1.9.0",
-    "superagent": "^1.7.2"
+    "superagent": "^1.7.2",
+    "twilio": "^2.9.0"
   }
 }
