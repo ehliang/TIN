@@ -32,7 +32,7 @@
       <file leaf-file-name="MainActivity.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/mhacks/com/tin/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.65625">
+            <state vertical-scroll-proportion="0.25">
               <caret line="68" column="87" selection-start-line="68" selection-start-column="87" selection-end-line="68" selection-end-column="87" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -1963,7 +1963,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/mhacks/com/tin/MainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.65625">
+        <state vertical-scroll-proportion="0.25">
           <caret line="68" column="87" selection-start-line="68" selection-start-column="87" selection-end-line="68" selection-end-column="87" />
           <folding>
             <element signature="imports" expanded="true" />
