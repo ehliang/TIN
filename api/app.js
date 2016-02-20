@@ -30,9 +30,11 @@ app.use(function(req, res, next) {
 // choose whatever port we want to listen on
 var port = process.env.PORT || 8080;
 
-app.get('/', function (req, res) {
-	var temp1 = [43.47248,-80.53370];
-	var temp2 = [43.57348,-80.53548];
+app.post('/', function (req, res) {
+	var temp1 = [req.body.user1.latitude, req.body.user1.longitude];
+	var temp2 = [req.body.user2.latitude, req.body.user2.longitude];
+	// var temp1 = [43.47248,-80.53370];
+	// var temp2 = [43.57348,-80.53548];
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
