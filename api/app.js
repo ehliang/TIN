@@ -57,6 +57,20 @@ var sendThis = function(toNumber, message){
 	});
 };
 
+setInterval(function(){
+          var now = Date.now(); 
+        var cutoff = now - 5 * 60 * 1000; 
+        var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff); 
+        var listener = old.on('child_added', function(snapshot) {
+            snapshot.ref().remove();
+        });
+
+
+}, 5*60*1000);   
+
+
+
+
 // choose whatever port we want to listen on
 var port = process.env.PORT || 8080;
 
@@ -89,14 +103,8 @@ app.post('/find-match', function(req, res){
             }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
         });
-
+*/
         //sets a timer to delete "beacons" older than two minutes
-        var now = Date.now(); 
-        var cutoff = now - 5 * 60 * 1000; 
-        var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff).limitToLast(1); 
-        var listener = old.on('child_added', function(snapshot) {
-            snapshot.ref().remove();
-        });*/
 
         myFirebaseRef.once("value", function(snapshot){
             promisifyExists(snapshot, phoneNumber, latitude, longitude).then(function(response) {
@@ -114,6 +122,7 @@ app.post('/find-match', function(req, res){
 	            		phoneNumber:phoneNumber,
 		                latitude:latitude, 
 		                longitude:longitude,
+                        timestamp: Date.now(),
 		                matched:false, 
 		            });
 		            console.log("Ref Created for " + phoneNumber);
