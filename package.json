@@ -1,0 +1,27 @@
+{
+  "name": "tin",
+  "version": "1.0.0",
+  "description": "Tourist Information Network",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd api && nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ehliang/TIN.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ehliang/TIN/issues"
+  },
+  "homepage": "https://github.com/ehliang/TIN#readme",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "lodash": "^4.5.0",
+    "nodemon": "^1.9.0",
+    "superagent": "^1.7.2"
+  }
+}
