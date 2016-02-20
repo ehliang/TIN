@@ -29,10 +29,25 @@ app.get('/', function (req, res) {
   res.send('Hello World!');
 });
 
+/***************** Receive the text message *******************************/
+app.post('/find-match', function(req, res){
+	var requestContent = String(req.body.Body);
+	var splitRequest = requestContent.split("@");
+    console.dir(String(req.body.Body));
+    if(splitRequest[0] === ""){
+    	var latitude = splitRequest[1];
+    	var longitude = splitRequest[2];
+
+    	console.log("latitude = " + latitude + "\nlongitude = " + longitude);
+    }else{
+    	console.log("incorrect formatting");
+    }
+}); 
+
 // use our router middleware
 app.use('/', mapRouter);
 
 //Run the server
 app.listen(port, function() {
 	console.log('Magic happens on port ' + port);
-})
+});

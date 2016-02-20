@@ -25,7 +25,18 @@ app.use(function(req, res, next) {
 var port = process.env.PORT || 8080;
 
 app.post('/', function(req, res){
+	var requestContent = String(req.body.Body);
+	var splitRequest = requestContent.split("@");
     console.dir(String(req.body.Body));
+    if(splitRequest[0] === ""){
+    	var latitude = splitRequest[1];
+    	var longitude = splitRequest[2];
+
+    	console.log("latitude = " + latitude + "\nlongitude = " + longitude);
+    }else{
+    	console.log("whoops");
+    }
+
     res.send("test");
 }); 
 
