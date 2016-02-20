@@ -9,3 +9,9 @@ module.exports = function() {
 		res.send("TEST WAS SUCCESSFUL");
 	});
 }
+
+router.get('/test', function(req, res) {
+	res.send("TEST WAS SUCCESSFUL");
+});
+
+module.exports = router;
