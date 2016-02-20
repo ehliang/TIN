@@ -25,5 +25,6 @@ var sendThis = function(message){
 	    }
 	});
 };
-
-sendThis("@19.3@131.4")
+//sendThis("@uuid1@42.2227109@-83.7153888")
+//sendThis("@random@42.1327109@-83.7153888");
+sendThis("@uuid2@42.2527109@-83.7153888");

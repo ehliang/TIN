@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 
 var Firebase = require('firebase');
 var myFirebaseRef = new Firebase("https://tin-m-hacks.firebaseio.com");  
-var userCounter =0;
+var userCounter = 0;
 
 // setInterval(function(){
 //           myFirebaseRef.child(userCounter).set({
@@ -35,6 +35,9 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Helper Functions
+
+
 // middleware to use for all requests
 // set the response headers
 app.use(function(req, res, next) {
@@ -49,15 +52,17 @@ app.use(function(req, res, next) {
 // choose whatever port we want to listen on
 var port = process.env.PORT || 8080;
 
-app.post('/', function(req, res){
+app.post('/find-match', function(req, res){
 	var requestContent = String(req.body.Body);
 	var splitRequest = requestContent.split("@");
+    // Log the request body for reference
     console.dir(String(req.body.Body));
     if(splitRequest[0] === ""){
         var uuid = splitRequest[1];
     	var latitude = splitRequest[2];
     	var longitude = splitRequest[3];
 
+        /*
         //create firebase entry based on uuid
         myFirebaseRef.child(uuid).set({
             latitude:latitude, 
@@ -67,10 +72,9 @@ app.post('/', function(req, res){
 
         //updates firebase snapshot every time new data is added
         myFirebaseRef.on("value", function(snapshot) {
-        console.log(snapshot.val());
-
-        }, function (errorObject) {
-         console.log("The read failed: " + errorObject.code);
+            console.log(snapshot.val());
+            }, function (errorObject) {
+            console.log("The read failed: " + errorObject.code);
         });
 
         //sets a timer to delete "beacons" older than two minutes
@@ -78,17 +82,26 @@ app.post('/', function(req, res){
         var cutoff = now - 5 * 60 * 1000; 
         var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff).limitToLast(1); 
         var listener = old.on('child_added', function(snapshot) {
-        snapshot.ref().remove();
+            snapshot.ref().remove();
+        });*/
+
+        myFirebaseRef.once("value", function(snapshot){
+            if(snapshot.exists()){
+                snapshot.forEach(function(firebaseUUID){
+                    //var distance = 
+                });
+            }
+
+            myFirebaseRef.child(uuid).set({
+                latitude:latitude, 
+                longitude:longitude, 
+            });
         });
-
-
 
     	console.log("latitude = " + latitude + "\nlongitude = " + longitude);
     }else{
     	console.log("whoops");
     }
-
-    res.send("test");
 }); 
 
 app.listen(port);
