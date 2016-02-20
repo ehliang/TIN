@@ -2,6 +2,7 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var _ = require('lodash');
 
 var app = express();
 var mapRouter = require('./routes/mapRouter.js');
@@ -30,33 +31,43 @@ var port = process.env.PORT || 8080;
 app.get('/', function (req, res) {
 	var temp1 = [43.47248,-80.53370];
 	var temp2 = [43.77348,-80.53548];
-	var i = 0;
-	var min = undefined;
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
 	midpoint.findNearbyPlaces(midpointish)
 	.then(function(response) {
-		response.forEach(function(place) {
-			var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
-			midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
-				console.log(++i);
-				if(min === undefined) {
-					min = {
-						'distance': response, 
-						'owner': place
-					}
-				} else {
-					if (response < min.distance) {
-						min.distance = response;
-						min.owner = place;
-					}
-				}
+		
+		var promises = _.map(response, function(place) {
+			return new Promise(function(resolve, reject) {
+				var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
+				midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
+					resolve({
+						"distance": response,
+						"owner": place
+					});
+				});
 			});
 		});
-		console.log(min);	
-	}).then(function(min) {
-		console.log("happy ", min);
+
+		return Promise.all(promises);
+	}).then(function(response) {
+		var min = undefined; 
+		_.forEach(response, function(location) {
+			if(min === undefined) {
+				min = {
+					"distance": location.distance, 
+					"owner": location.owner
+				}
+			} else {
+				if(location.distance < min.distance) {
+					min = {
+						"distance": location.distance, 
+						"owner": location.owner
+					}
+				}
+			}
+		})
+		res.send(min);
 	});
 });
 
