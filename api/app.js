@@ -57,16 +57,25 @@ var sendThis = function(toNumber, message){
 	});
 };
 
+function clean(snapshot) {
+    	 snapshot.forEach(function(childSnapshot){
+    		sendThis(childSnapshot.key(), "Match not found.");
+			snapshot.ref().remove();
+			console.log("doing a clean")
+    	});
+    }
+
 setInterval(function(){
-          var now = Date.now(); 
-        var cutoff = now - 5 * 60 * 1000; 
+var now = Date.now(); 
+var cutoff = now - 1 * 60 * 1000; 
         var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff); 
-        var listener = old.on('child_added', function(snapshot) {
-            snapshot.ref().remove();
-        });
-
-
-}, 5*60*1000);   
+        old.once('value', clean);
+        // old.on("value", function () {
+        // 	console.log("Looks done?")
+        // 	old.off("child_added", clean);
+        // })
+    
+}, 1*60*1e3);   
 
 
 
@@ -103,7 +112,7 @@ app.post('/find-match', function(req, res){
             }, function (errorObject) {
             console.log("The read failed: " + errorObject.code);
         });
-*/
+		*/
         //sets a timer to delete "beacons" older than two minutes
 
         myFirebaseRef.once("value", function(snapshot){
@@ -114,6 +123,7 @@ app.post('/find-match', function(req, res){
             	}else{
             		console.log("The response is: " + String(response));
             		console.log("Waiting for match");
+            		sendThis(phoneNumber, "Waiting for match...");
             		return false;
             	}
             }).then(function(response){
