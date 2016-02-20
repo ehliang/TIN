@@ -56,7 +56,7 @@ module.exports.findGatheringPoint = function(firstUserPoint, secondUserPoint, mi
     });  
 }
 
-var calculateDuration = function(pointOne, pointTwo) {
+module.exports.calculateDistance = function(pointOne, pointTwo) {
 	var string = "https://maps.googleapis.com/maps/api/distancematrix/json?"+
    		"origins="+pointOne[0]+","+pointOne[1]+
    		"&destinations="+pointTwo[0]+","+pointTwo[1]+
@@ -73,7 +73,6 @@ var calculateDuration = function(pointOne, pointTwo) {
    				} else{
    					resolve(res.body.rows[0].elements[0].distance.value);
    				}
-   				
    			}
    		})
 	})
@@ -82,9 +81,8 @@ var calculateDuration = function(pointOne, pointTwo) {
 module.exports.findNearbyPlaces = function(midpoint) {
 	var string = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"+
    		"location="+midpoint[0]+","+midpoint[1]+
-   		"&radius=500"+
+   		"&radius=1500"+
    		"&key="+API_KEY;
-   	console.log(string);
 
    	return new Promise(function(resolve, reject) {
 		request
@@ -96,11 +94,14 @@ module.exports.findNearbyPlaces = function(midpoint) {
 	   				if(res.body === undefined) {
 	   					reject("error");
 	   				} else {
-	   					console.log(res.body);
-	   					resolve(res.body);
+	   					var array = [];
+	   					for(var i = 0; i < res.body.results.length-1; i++) {
+	   						array.push(res.body.results[i+1]);
+	   					}
+	   					resolve(array);
 	   				}
-	   				
 	   			}
 	   		})
 	})
 }
+

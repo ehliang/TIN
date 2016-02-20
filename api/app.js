@@ -30,10 +30,32 @@ var port = process.env.PORT || 8080;
 app.get('/', function (req, res) {
 	var temp1 = [43.47248,-80.53370];
 	var temp2 = [43.77348,-80.53548];
+	var i = 0;
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
-	midpoint.findNearbyPlaces(midpointish);
+	midpoint.findNearbyPlaces(midpointish).then(function(response) {
+		var min = undefined;
+		response.forEach(function(place) {
+			console.log(place);
+			var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
+			midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
+				console.log("enter");
+				if(min === undefined) {
+					min.distance = response;
+					min.owner = place;
+				} else {
+					if (response < min.distance) {
+						min.distance = response;
+						min.owner = place;
+					}
+				}
+			}).catch(function(error) {
+				console.log(error);
+			})
+		});
+		console.log(min);
+	});
 });
 
 // use our router middleware
