@@ -31,30 +31,35 @@ app.get('/', function (req, res) {
 	var temp1 = [43.47248,-80.53370];
 	var temp2 = [43.77348,-80.53548];
 	var i = 0;
+	var min = undefined;
 
 	var midpointish = util.findMidPoint(temp1, temp2);
 
 	midpoint.findNearbyPlaces(midpointish).then(function(response) {
-		var min = undefined;
-		response.forEach(function(place) {
-			console.log(place);
-			var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
-			midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
-				console.log("enter");
-				if(min === undefined) {
-					min.distance = response;
-					min.owner = place;
-				} else {
-					if (response < min.distance) {
-						min.distance = response;
-						min.owner = place;
+		return new Promise(function(resolve, reject) {
+			Promise.all(response.forEach(function(place) {
+				var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
+				midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
+					console.log(++i);
+					if(min === undefined) {
+						min = {
+							'distance': response, 
+							'owner': place
+						}
+					} else {
+						if (response < min.distance) {
+							min.distance = response;
+							min.owner = place;
+						}
 					}
-				}
-			}).catch(function(error) {
-				console.log(error);
-			})
-		});
-		console.log(min);
+					console.log(min);
+				});
+			})).then(function(response) {
+				resolve(min);
+			});
+		})		
+	}).then(function(response) {
+		console.log("happy");
 	});
 });
 
