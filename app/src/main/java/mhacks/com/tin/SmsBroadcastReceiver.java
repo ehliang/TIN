@@ -32,7 +32,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             Toast.makeText(context, smsMessageStr, Toast.LENGTH_SHORT).show();
 
             MainActivity inst = MainActivity.instance();
-            inst.retreiveMessage(smsMessageStr);
+            inst.retrieveMessage(smsMessageStr);
 
 
         }
