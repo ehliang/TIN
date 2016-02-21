@@ -1,10 +1,14 @@
+// Use Strict because it's the best
 'use strict';
 
-var express = require('express');
-var twilio = require('twilio');
-var bodyParser = require('body-parser');
-var _ = require('lodash');
-var striptags = require('striptags');
+var express = require('express'); // hi
+var twilio = require('twilio'); // for SMS
+var bodyParser = require('body-parser'); //middleware for POST requests
+var _ = require('lodash'); // _.forEach()
+var striptags = require('striptags'); // strip string of HTML elements
+var request = require('superagent'); // HTTP requests
+var rp = require('request-promise'); // HTTP requests
+var each = require('async-each-series'); // execute array of asynchronous functions synchronously
 
 var Firebase = require('firebase');
 var myFirebaseRef = new Firebase("https://tin-m-hacks.firebaseio.com");  
@@ -27,6 +31,9 @@ var mapDirection = require('./mapDirection.js');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// choose whatever port we want to listen on
+var port = process.env.PORT || 8080;
+
 // middleware to use for all requests
 // set the response headers
 app.use(function(req, res, next) {
@@ -40,53 +47,55 @@ app.use(function(req, res, next) {
 
 //Send an SMS text message
 var sendThis = function(toNumber, message){
-	console.log(toNumber);
-	client.sendMessage({
+	return new Promise(function(resolve, reject) {
+		client.sendMessage({
 
-	    to: toNumber, // Any number Twilio can deliver to
-	    from: '+17082924124', // A number you bought from Twilio and can use for outbound communication
-	    body: message // body of the SMS message
+		    to: toNumber, // Any number Twilio can deliver to
+		    from: '+17082924124', // A number you bought from Twilio and can use for outbound communication
+		    body: message // body of the SMS message
 
-	}, function(err, responseData) { //this function is executed when a response is received from Twilio
+		}, function(err, responseData) { //this function is executed when a response is received from Twilio
 
-	    if (!err) { // "err" is an error received during the request, if any
+			if(err) {
+				reject(err);
+			} else { // "err" is an error received during the request, if any
 
-	        // "responseData" is a JavaScript object containing data received from Twilio.
-	        // A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
-	        // http://www.twilio.com/docs/api/rest/sending-sms#example-1
+		        // "responseData" is a JavaScript object containing data received from Twilio.
+		        // A sample response from sending an SMS message is here (click "JSON" to see how the data appears in JavaScript):
+		        // http://www.twilio.com/docs/api/rest/sending-sms#example-1
 
-	        console.log(responseData.from); // outputs "+14506667788"
-	        console.log(responseData.body); // outputs "word to your mother."
-
-	    }
+		        //console.log(responseData.from); // outputs "+14506667788"
+		        console.log(responseData.body); // outputs "word to your mother."
+		        resolve(true);
+		    }
+		});
 	});
 };
 
 function clean(snapshot) {
-    	 snapshot.forEach(function(childSnapshot){
-    		sendThis(childSnapshot.key(), "Match not found.");
-			snapshot.ref().remove();
-			console.log("doing a clean")
-    	});
-    }
+ 	snapshot.forEach(function(childSnapshot){
+ 		if(childSnapshot.val().matched === false){
+		sendThis(childSnapshot.key(), "Match not found.");
+		}
+		// snapshot.ref().remove();
+		// console.log("doing a clean");
+	});
+	snapshot.ref().remove();
+	console.log("doing a clean");
+}
 
 setInterval(function(){
-var now = Date.now(); 
-var cutoff = now - 1 * 60 * 1000; 
-        var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff); 
-        old.once('value', clean);
-        // old.on("value", function () {
-        // 	console.log("Looks done?")
-        // 	old.off("child_added", clean);
-        // })
+	var now = Date.now(); 
+	var cutoff = now - 1 * 60 * 1000; 
+    var old = myFirebaseRef.orderByChild('timestamp').startAt(cutoff); 
+    old.once('value', clean);
+    // old.on("value", function () {
+    // 	console.log("Looks done?")
+    // 	old.off("child_added", clean);
+    // })
     
 }, 1*60*1e3);   
 
-
-
-
-// choose whatever port we want to listen on
-var port = process.env.PORT || 8080;
 
 app.post('/', function (req, res) {
 	var temp1 = [req.body.user1.latitude, req.body.user1.longitude];
@@ -182,34 +191,17 @@ app.post('/find-match', function(req, res){
     	var latitude = splitRequest[2];
     	var longitude = splitRequest[3];
 
-        /*
-        //create firebase entry based on uuid
-        myFirebaseRef.child(uuid).set({
-            latitude:latitude, 
-            longitude:longitude, 
-        });
-
-
-        //updates firebase snapshot every time new data is added
-        myFirebaseRef.on("value", function(snapshot) {
-            console.log(snapshot.val());
-            }, function (errorObject) {
-            console.log("The read failed: " + errorObject.code);
-        });
-		*/
-        //sets a timer to delete "beacons" older than two minutes
-
         myFirebaseRef.once("value", function(snapshot){
             promisifyExists(snapshot, phoneNumber, latitude, longitude).then(function(response) {
-            	if(response != ""){
-            		console.log("Your match is: " + String(response));
-            		return true;
-            	}else{
-            		console.log("The response is: " + String(response));
-            		console.log("Waiting for match");
-            		sendThis(phoneNumber, "Waiting for match...");
-            		return false;
-            	}
+            	return new Promise(function(resolve, reject) {
+            		if(response != ""){
+	            		console.log("Your match is: " + String(response));
+	            		resolve(true);
+	            	}else{
+	            		sendThis(phoneNumber, "Waiting for match...");
+	            		resolve(false);
+	            	}
+	            });
             }).then(function(response){
             	if(response === false){
 	            	myFirebaseRef.child(phoneNumber).set({
@@ -239,19 +231,128 @@ var promisifyExists = function(snapshot, phoneNumber, latitude, longitude) {
 		if(snapshot.exists()){
             snapshot.forEach(function(childSnapshot){
             	var childData = childSnapshot.val();
-            	if(childData.matched === false){
-	                //var distance = calculateDistance(latitude, childData.latitude, longitude, childData.longitude);
-	                var distance = Math.abs(Math.abs(latitude) - Math.abs(childData.latitude)) + Math.abs(Math.abs(longitude) - Math.abs(childData.longitude));
-	                //console.log(childSnapshot.key());
-	                //console.log(distance);
-	                if(distance < 0.05){
-	                	match = childSnapshot.key();
-	                	// Update matched person to make sure nobody else matches with them.
-	                	myFirebaseRef.child(match).update({matched:true});
-	                	sendThis(match, "Matched!");
-	                	sendThis(phoneNumber, "Matched!");
-	                	return true;
-	                }
+				if(childData.matched === false){
+					//var distance = calculateDistance(latitude, childData.latitude, longitude, childData.longitude);
+					var distance = Math.abs(Math.abs(latitude) - Math.abs(childData.latitude)) + Math.abs(Math.abs(longitude) - Math.abs(childData.longitude));
+					//console.log(childSnapshot.key());
+					//console.log(distance);
+					if(distance < 0.5){
+						// Key in this case is the phone number
+						match = childSnapshot.key();
+						// Update matched person to make sure nobody else matches with them.
+						myFirebaseRef.child(match).update({matched:true});
+						sendThis(match, "Matched!");
+						sendThis(phoneNumber, "Matched!");
+
+						rp({
+						    method: 'POST',
+						    uri: 'http://a968f7f9.ngrok.io/testing',
+						    body: {
+									user1: {
+										latitude: latitude,
+										longitude: longitude
+									},
+									user2: {
+										latitude: childData.latitude,
+										longitude: childData.longitude
+									}
+						    },
+						    json: true // Automatically stringifies the body to JSON 
+						}).then(function (res){
+							return new Promise(function(resolve, reject) {
+								console.log("***********************************************");
+								console.log(res);
+								//console.log(res.userOne);
+								resolve(res);
+							})
+							
+						}).then(function(res){
+							return new Promise(function(resolve, reject) {
+								sendThis(phoneNumber, "Start")
+								.then(function(response) {
+									return sendThis(match, "Start");
+								}).then(function(response2) {
+									resolve(res);
+								})
+							})
+							
+						}).then(function(res){
+							return new Promise(function(resolve, reject) {
+								sendThis(phoneNumber, "@" + res.name)
+								.then(function(response) {
+									return sendThis(match, "@" + res.name);
+								}).then(function(response2) {
+									resolve(res);
+								})
+							})
+							
+						}).then(function(res){
+							return new Promise(function(resolve, reject) {
+								sendThis(phoneNumber, "@" + res.address)
+								.then(function(response) {
+									return sendThis(match, "@" + res.address);
+								}).then(function(response2) {
+									resolve(res);
+								})
+							})
+							
+						}).then(function(res){
+							return new Promise(function(resolve, reject) {
+								each(res.userOne, function(direction, next) {
+									if(direction.includes('Destination will')) {
+										sendThis(phoneNumber, direction.substring(0,direction.indexOf('Destination will')))
+										.then(function(response) {
+											sendThis(phoneNumber, direction.substring(direction.indexOf('Destination will')))
+											.then(function(response) {
+												resolve(res);
+											})
+										})
+									} else {
+										sendThis(phoneNumber, direction).then(function(response) {
+											next();
+										});
+									}
+								}, function(err) {
+										resolve(res);
+								})
+							})
+
+						}).then(function(res){
+
+							return new Promise(function(resolve, reject) {
+								each(res.userTwo, function(direction, next) {
+									if(direction.includes('Destination will')) {
+										sendThis(match, direction.substring(0,direction.indexOf('Destination will')))
+										.then(function(response) {
+											sendThis(match, direction.substring(direction.indexOf('Destination will')))
+											.then(function(response) {
+												resolve(res);
+											})
+										})
+									} else {
+										sendThis(match, direction).then(function(response) {
+											next();
+										});
+									}
+								}, function(err) {
+										resolve(res);
+								})
+							})
+							
+						}).then(function(res){
+							return new Promise(function(resolve, reject) {
+								sendThis(phoneNumber, "End").then(function(response) {
+									sendThis(match, "End").then(function(response) {
+										resolve(res);
+									})
+								})								
+							})
+							
+						}).catch(function (err){
+							console.log(err);
+						});
+						return true;
+					}
                 }
             });
             resolve(match);

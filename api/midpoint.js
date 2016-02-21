@@ -1,7 +1,7 @@
 var request = require('superagent');
 var util = require('./util.js');
 
-var API_KEY="AIzaSyD6iLzUSsNhsaP9Y2BK96wObMnhzWM_1jM";
+var API_KEY="AIzaSyBIJxVeb8GOebSNEEC_pjOUKEKaYhPVvus";
 
 module.exports.calculateDistance = function(pointOne, pointTwo) {
 	var string = "https://maps.googleapis.com/maps/api/distancematrix/json?"+

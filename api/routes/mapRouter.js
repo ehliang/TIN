@@ -11,8 +11,12 @@ var mapDirection = require('../mapDirection.js');
 
 // API endpoint for getting travel directions
 router.post('/testing', function(req, res) {
-	var temp1 = [req.body.user1.latitude, req.body.user1.longitude];
-	var temp2 = [req.body.user2.latitude, req.body.user2.longitude];
+	console.log(req.body);
+
+	var temp1 = [parseFloat(req.body.user1.latitude), parseFloat(req.body.user1.longitude)];
+	var temp2 = [parseFloat(req.body.user2.latitude), parseFloat(req.body.user2.longitude)];
+	console.log("####, ", temp1);
+	console.log("$$$$, ", temp2);
 	// var temp1 = [43.47248,-80.53370];
 	// var temp2 = [43.57348,-80.53548];
 
@@ -24,11 +28,13 @@ router.post('/testing', function(req, res) {
 		var promises = _.map(response, function(place) {
 			return new Promise(function(resolve, reject) {
 				var placeLocation = [place.geometry.location.lat, place.geometry.location.lng];
-				midpoint.calculateDistance(midpointish, placeLocation).then(function(response) {
-					resolve({
-						"distance": response,
-						"owner": place
-					});
+				midpoint.calculateDistance(temp1, placeLocation).then(function(distance1) {
+					midpoint.calculateDistance(temp2, placeLocation).then(function(distance2) {
+						resolve({
+							"distance": distance1+distance2,
+							"owner": place
+						});
+					})
 				});
 			});
 		});
@@ -52,7 +58,8 @@ router.post('/testing', function(req, res) {
 			}
 		})
 		return new Promise(function(resolve, reject) {
-			res.send(min);
+			// console.log(min);
+			// res.send(min);
 			resolve(min);
 		});
 	}).then(function(data) {
@@ -82,9 +89,10 @@ router.post('/testing', function(req, res) {
 						"userTwo": userTwoDirections
 					}
 					console.log(obj);
-					var stringed = JSON.stringify(obj);
-					console.log(stringed);
-					res.send(stringed);
+					// var stringed = JSON.stringify(obj);
+					// console.log(stringed);
+					// res.send(stringed);
+					res.json(obj);
 
 					resolve(true);
 				});
