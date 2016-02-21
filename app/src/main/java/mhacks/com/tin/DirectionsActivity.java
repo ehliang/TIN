@@ -1,5 +1,6 @@
 package mhacks.com.tin;
 
+import android.support.v7.app.ActionBar;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ public class DirectionsActivity extends AppCompatActivity implements SmsBroadcas
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_directions);
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("");
         receiver.setOnSmsReceivedListener(this);
 
         adapter = new ListAdapter(this, directionsList);
@@ -38,8 +41,21 @@ public class DirectionsActivity extends AppCompatActivity implements SmsBroadcas
     @Override
     public void onSmsReceived(String sender, String message)
     {
-        directionsList.add(sender + message + sender + message);
-        adapter.notifyDataSetChanged();
+        if (message.equals("Start") || message.equals("End"))
+        {
+
+        }
+        else if (message.charAt(0)=='@')
+        {
+            ActionBar ab = getSupportActionBar();
+            ab.setTitle("Meet at: " + message.substring(1));
+
+        }
+        else {
+            directionsList.add(message);
+            adapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override

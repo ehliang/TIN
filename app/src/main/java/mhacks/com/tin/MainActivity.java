@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements SmsBroadcastRecei
         receiver.setOnSmsReceivedListener(this);
 
         final Button sendLocation = (Button) findViewById(R.id.send_location);
+        sendLocation.getBackground().setColorFilter(0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
 
         final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         TelephonyManager tMgr = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
@@ -105,8 +107,6 @@ public class MainActivity extends AppCompatActivity implements SmsBroadcastRecei
                 Log.i("pressed", "button");
                 sendLocation.setText("Waiting for location...");
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-//                Intent intent = new Intent(getBaseContext(), DirectionsActivity.class);
-//                startActivity(intent);
             }
         });
     }
@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements SmsBroadcastRecei
         super.onResume();
         IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
         this.registerReceiver(receiver, intentFilter);
+        Button sendLocation = (Button) findViewById(R.id.send_location);
+        sendLocation.setText("Match Now");
     }
 
     @Override
@@ -134,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements SmsBroadcastRecei
     @Override
     public void onSmsReceived(String sender, String message) {
         Button sendLocation = (Button) findViewById(R.id.send_location);
+        TextView test = (TextView) findViewById(R.id.test_text);
         if (message.equals(getString(R.string.found)))
         {
             sendLocation.setText(getString(R.string.found));
@@ -142,7 +145,8 @@ public class MainActivity extends AppCompatActivity implements SmsBroadcastRecei
         }
         else if (message.equals(getString(R.string.not_found)))
         {
-            sendLocation.setText(getString(R.string.not_found));
+            sendLocation.setText("Match Now");
+            test.setText("");
         }
     }
 

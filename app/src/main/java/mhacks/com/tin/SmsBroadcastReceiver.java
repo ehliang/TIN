@@ -45,7 +45,6 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
                     listener.onSmsReceived(address, smsBody);
                 }
             }
-            Toast.makeText(context, smsMessageStr, Toast.LENGTH_SHORT).show();
 
 
         }

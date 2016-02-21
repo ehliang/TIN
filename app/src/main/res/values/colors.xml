@@ -3,6 +3,7 @@
     <item name="main_color" type="color">#002157</item>
     <item name="white" type="color">#FFFFFF</item>
     <item name="grey" type="color">#333333</item>
+    <item name="black" type="color">#000000</item>
 
 
 </resources>

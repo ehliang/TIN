@@ -8,14 +8,13 @@
 
     <TextView
         android:id="@+id/direction_number"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="1"
         android:textColor="@color/main_color"
         android:textSize="25sp"
-        android:layout_alignParentLeft="true"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"/>
+        android:paddingRight="10dp"
+        android:layout_alignParentLeft="true"/>
 
     <TextView
         android:id="@+id/direction_text"
@@ -23,5 +22,5 @@
         android:layout_height="wrap_content"
         android:text="Turn Left"
         android:textSize="25sp"
-        android:layout_alignEnd="@id/direction_number"/>
+        android:layout_toRightOf="@+id/direction_number"/>
 </RelativeLayout>
