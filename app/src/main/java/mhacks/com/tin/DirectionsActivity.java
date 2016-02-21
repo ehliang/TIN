@@ -1,5 +1,6 @@
 package mhacks.com.tin;
 
+import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,15 +10,19 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class DirectionsActivity extends AppCompatActivity {
+public class DirectionsActivity extends AppCompatActivity implements SmsBroadcastReceiver.OnSmsReceivedListener {
+
+    private ArrayList<String> directionsList = new ArrayList<String>();
+    private SmsBroadcastReceiver receiver = new SmsBroadcastReceiver();
+    private ListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_directions);
-        ArrayList<String> directionsList = new ArrayList<String>();
+        receiver.setOnSmsReceivedListener(this);
 
-        ListAdapter adapter = new ListAdapter(this, directionsList);
+        adapter = new ListAdapter(this, directionsList);
 
         ListView listView = (ListView)findViewById(R.id.directions_list);
         listView.setAdapter(adapter);
@@ -28,6 +33,26 @@ public class DirectionsActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_directions, menu);
         return true;
+    }
+
+    @Override
+    public void onSmsReceived(String sender, String message)
+    {
+        directionsList.add(sender + message + sender + message);
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        this.registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        this.unregisterReceiver(receiver);
     }
 
     @Override

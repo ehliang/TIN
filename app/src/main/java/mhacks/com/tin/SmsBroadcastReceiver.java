@@ -10,12 +10,24 @@ import android.widget.Toast;
 /**
  * Created by xe on 2016-02-20.
  */
+
 public class SmsBroadcastReceiver extends BroadcastReceiver {
 
     public static final String SMS_BUNDLE = "pdus";
 
+    public interface OnSmsReceivedListener {
+        public void onSmsReceived(String sender, String message);
+    }
+
+    private OnSmsReceivedListener listener = null;
+
+    public void setOnSmsReceivedListener(Context context) {
+        this.listener = (OnSmsReceivedListener) context;
+    }
+
     public void onReceive(Context context, Intent intent) {
         Bundle intentExtras = intent.getExtras();
+
 
         if (intentExtras != null) {
             Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
@@ -28,11 +40,12 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
                 smsMessageStr += "SMS From: " + address + "\n";
                 smsMessageStr += smsBody + "\n";
+
+                if (listener != null) {
+                    listener.onSmsReceived(address, smsBody);
+                }
             }
             Toast.makeText(context, smsMessageStr, Toast.LENGTH_SHORT).show();
-
-            MainActivity inst = MainActivity.instance();
-            inst.retrieveMessage(smsMessageStr);
 
 
         }

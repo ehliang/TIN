@@ -1,12 +1,16 @@
 package mhacks.com.tin;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.renderscript.Sampler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -20,18 +24,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.jar.Manifest;
+
+public class MainActivity extends AppCompatActivity implements SmsBroadcastReceiver.OnSmsReceivedListener {
     private double latitude, longitude;
-    private static MainActivity inst;
-    public static MainActivity instance()
-    {
-        return inst;
-    }
+    private SmsBroadcastReceiver receiver = new SmsBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.READ_SMS"}, 0);
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.READ_PHONE_STATE"}, 0);
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.ACCESS_FINE_LOCATION"}, 0);
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.RECEIVE_SMS"}, 0);
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.READ_SMS"}, 0);
+
+        receiver.setOnSmsReceivedListener(this);
 
         final Button sendLocation = (Button) findViewById(R.id.send_location);
 
@@ -59,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.i("messageContent", messageContent);
                     smsManager.sendTextMessage("17082924124", null, messageContent, null, null);
-                    Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getBaseContext(), "SMS Sent", Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -95,22 +105,23 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("pressed", "button");
                 sendLocation.setText("Waiting for location...");
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+//                Intent intent = new Intent(getBaseContext(), DirectionsActivity.class);
+//                startActivity(intent);
             }
         });
-
     }
 
-    public void retrieveMessage(String messageString)
-    {
-        Button sendLocation = (Button) findViewById(R.id.send_location);
-        if (messageString.equals(getString(R.string.found)))
-        {
-            sendLocation.setText(getString(R.string.found));
-        }
-        else if (messageString.equals(getString(R.string.not_found)))
-        {
-            sendLocation.setText(getString(R.string.not_found));
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        this.registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        this.unregisterReceiver(receiver);
     }
 
     @Override
@@ -118,6 +129,21 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public void onSmsReceived(String sender, String message) {
+        Button sendLocation = (Button) findViewById(R.id.send_location);
+        if (message.equals(getString(R.string.found)))
+        {
+            sendLocation.setText(getString(R.string.found));
+            Intent intent = new Intent(getBaseContext(), DirectionsActivity.class);
+            startActivity(intent);
+        }
+        else if (message.equals(getString(R.string.not_found)))
+        {
+            sendLocation.setText(getString(R.string.not_found));
+        }
     }
 
     @Override

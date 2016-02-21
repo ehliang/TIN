@@ -24,6 +24,7 @@ public class ListAdapter extends ArrayAdapter<String>{
     public View getView(int position, View convertView, ViewGroup parent)
     {
         String command = getItem(position);
+        int new_position = position+1;
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.direction_item, parent, false);
         }
@@ -31,7 +32,7 @@ public class ListAdapter extends ArrayAdapter<String>{
         TextView directionsText = (TextView) convertView.findViewById(R.id.direction_text);
         TextView directionsNumber = (TextView) convertView.findViewById(R.id.direction_number);
         directionsText.setText(command);
-        directionsNumber.setText(""+ position);
+        directionsNumber.setText(""+ new_position);
         return convertView;
     }
 

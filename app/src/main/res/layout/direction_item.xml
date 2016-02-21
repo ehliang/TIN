@@ -14,7 +14,8 @@
         android:textColor="@color/main_color"
         android:textSize="25sp"
         android:layout_alignParentLeft="true"
-        android:paddingLeft="10dp"/>
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"/>
 
     <TextView
         android:id="@+id/direction_text"
@@ -22,6 +23,5 @@
         android:layout_height="wrap_content"
         android:text="Turn Left"
         android:textSize="25sp"
-        android:paddingLeft="30dp"
         android:layout_alignEnd="@id/direction_number"/>
 </RelativeLayout>
